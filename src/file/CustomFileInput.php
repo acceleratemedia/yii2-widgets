@@ -25,8 +25,10 @@ class CustomFileInput extends InputWidget
         $this->field->labelOptions['class'] = 'custom-file-label';
         $this->field->labelOptions['data-content'] = 'Browse';
         $this->field->options['class'] .= ' custom-file restore-normal-hint';
+        $this->field->template = "{input}\n{label}\n{error}\n{hint}";
 
         if(isset($this->field->hintType)){
+            // --- THis removes some bug styling on this input type for kartik activeform/fields
             Html::removeCssClass($this->field->options, 'kv-hint-special');
         }
 
@@ -34,7 +36,8 @@ class CustomFileInput extends InputWidget
         if (!isset($this->field->form->options['enctype'])) {
             $this->field->form->options['enctype'] = 'multipart/form-data';
         }
-        return Html::activeFileInput($this->model, $this->attribute, ['class' => 'custom-file-input']);
+        Html::addCssClass($this->options, 'custom-file-input');
+        return Html::activeFileInput($this->model, $this->attribute, $this->options);
     }
 
     /**
@@ -60,12 +63,18 @@ JAVASCRIPT;
     {
         $css = <<<CSS
 .custom-file-label::after{
-    content: attr(data-content);
+    content: attr(data-content) !important;
 }
 .restore-normal-hint .kv-hint-block{
-font-size: 0.75rem;
+    font-size: 0.75rem;
     margin-top: 0.375rem;
     color: #999;
+}
+.restore-normal-hint .fa-question-circle{
+    display:none;
+}
+.custom-file-input:disabled{
+    opacity:0 !important;
 }
 CSS;
         Yii::$app->view->registerCss($css, [], 'custom-file-css');
