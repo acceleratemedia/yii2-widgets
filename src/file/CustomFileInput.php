@@ -27,6 +27,10 @@ class CustomFileInput extends InputWidget
         $this->field->options['class'] .= ' custom-file restore-normal-hint';
         $this->field->template = "{input}\n{label}\n{error}\n{hint}";
 
+        if(empty($this->field->options['style'])){
+            $this->field->options['style'] = 'margin-bottom:1rem;';
+        }
+
         if(isset($this->field->hintType)){
             // --- THis removes some bug styling on this input type for kartik activeform/fields
             Html::removeCssClass($this->field->options, 'kv-hint-special');
