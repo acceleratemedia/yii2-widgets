@@ -81,10 +81,6 @@ JAVASCRIPT;
 $("[data-{$this->formDataAttribute}]").on("beforeValidate", function (event, messages, deferred) {
     $(this).disableSubmitButtons("{$this->disableElementSelector}");
 }).on("afterValidate", function (event, messages, errorAttributes) {
-    console.log("event");
-    console.log(event);
-    console.log("errorAttributes.length");
-    console.log(errorAttributes.length);
     if (errorAttributes.length == 0) {
         return;
     }
