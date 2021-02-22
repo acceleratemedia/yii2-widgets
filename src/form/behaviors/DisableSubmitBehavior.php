@@ -8,13 +8,15 @@ use yii\web\View;
 
 /**
  * DisableSubmitBehavior is meant to be attached to ActiveForm widgets and
- * registers javascript that will
+ * registers javascript that will enable and display submit buttons and change
+ * the button text as well
  */
 class DisableSubmitBehavior extends Behavior
 {
     /**
-     * @var string Name of a data attribute that will be used identify the element
-     * whose child ubsmit buttons will ne disabled or enabled
+     * @var string Name of a data attribute "data-{$formDataAttribute}" that will 
+     * be used identify the element whose child susmit buttons will be disabled
+     * or enabled
      */
     public $formDataAttribute = "disable-on-submit";
 
@@ -79,6 +81,10 @@ JAVASCRIPT;
 $("[data-{$this->formDataAttribute}]").on("beforeValidate", function (event, messages, deferred) {
     $(this).disableSubmitButtons("{$this->disableElementSelector}");
 }).on("afterValidate", function (event, messages, errorAttributes) {
+    console.log("event");
+    console.log(event);
+    console.log("errorAttributes.length");
+    console.log(errorAttributes.length);
     if (errorAttributes.length == 0) {
         return;
     }
