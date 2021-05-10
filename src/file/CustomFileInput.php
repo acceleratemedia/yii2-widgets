@@ -16,24 +16,38 @@ use yii\widgets\InputWidget;
 class CustomFileInput extends InputWidget
 {
     /**
+     * Template to be used on an ActiveField instance
+     * @var string
+     */
+    public $fieldTemplate;
+
+    /**
+     * Whether to render using Bootstrap 5 styles
+     * @var boolean
+     */
+    public $bs5 = false;
+
+    /**
      * Renders a file input with bootstrap 4 custom styles
      * @return string
      */
     public function run(){
-        $this->registerCustomFileInputJavascript();
-        $this->registerCustomFileInputStyles();
+        if(!$this->bs5){
+            $this->registerCustomFileInputJavascript();
+            $this->registerCustomFileInputStyles();
+            $this->field->labelOptions['data-content'] = 'Browse';
+
+            if(isset($this->field->hintType)){
+                // --- THis removes some bug styling on this input type for kartik activeform/fields
+                Html::removeCssClass($this->field->options, 'kv-hint-special');
+            }
+        }
         $this->field->labelOptions['class'] = 'custom-file-label';
-        $this->field->labelOptions['data-content'] = 'Browse';
-        $this->field->options['class'] .= ' custom-file restore-normal-hint';
-        $this->field->template = "{input}\n{label}\n{error}\n{hint}";
+        $this->field->options['class']['customFileInput'] = 'custom-file restore-normal-hint';
+        $this->field->template = $this->getFieldTemplate();
 
         if(empty($this->field->options['style'])){
             $this->field->options['style'] = 'margin-bottom:1rem;';
-        }
-
-        if(isset($this->field->hintType)){
-            // --- THis removes some bug styling on this input type for kartik activeform/fields
-            Html::removeCssClass($this->field->options, 'kv-hint-special');
         }
 
         // --- {@see \yii\widgets\ActiveField::fileInput()}
@@ -82,5 +96,21 @@ JAVASCRIPT;
 }
 CSS;
         Yii::$app->view->registerCss($css, [], 'custom-file-css');
+    }
+
+    /**
+     * Get the field template with default values for BS5 or otherwise
+     * @return string
+     */
+    public function getFieldTemplate()
+    {
+        if(empty($this->fieldTemplate)){
+            if($this->bs5){
+                $this->fieldTemplate = "{label}\n{input}\n{error}\n{hint}";
+            } else {
+                $this->fieldTemplate = "{input}\n{label}\n{error}\n{hint}";
+            }
+        }
+        return $this->fieldTemplate;
     }
 }
