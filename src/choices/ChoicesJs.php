@@ -1,6 +1,7 @@
 <?php
 namespace bvb\choices;
 
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Inflector;
 use yii\helpers\Json;
@@ -24,82 +25,73 @@ class ChoicesJs extends \yii\widgets\InputWidget
     public $jsOptions = [];
 
     /**
-     * A url that will be requested to set the choices. This automatically 
-     * configures a number of options and registers javascript to provide for
-     * an optimal AJAX experience. 
-     * If this value is provided, the following values will be set IF they have
-     * not already been:
-     * ```php
-     * 'jsOptions' => [
-     *     'noChoicesText' => 'Type to search',
-     *     'placeholder' => true,
-     *     'searchChoices' => false
-     * ],
-     * 'options' => [
-     *     'prompt' => 'Type to search'
-     * ]
-     * ```
-     * This will also register javascript that uses fetch() to get the results,
-     * clears the choices after a selection is made, and focuses on the search
-     * input after opening the dropdown
-     * @see $searchListenerJs
-     * @see getSearchListenerJs()
-     * @see $clearChoicesJs
-     * @see getClearChoicesJs()
-     * @see $showDropdownFocusJs
-     * @see getShowDropdownFocusJs()
-     * @var string
+     * Options that can be passed in if this plugin is desired to be run by
+     * setting choices from a remote data source using AJAX. To set this up
+     * to use ajax, only the 'url' key is required. Configuration is as such:
+     * `ajax`:
+     *     A url that will be requested to set the choices. This automatically 
+     *     configures a number of options and registers javascript to provide for
+     *     an optimal AJAX experience. 
+     *     If this value is provided, the following values will be set IF they have
+     *     not already been:
+     *     ```php
+     *     'jsOptions' => [
+     *         'noChoicesText' => 'No items matching search',
+     *         'placeholder' => true,
+     *         'searchChoices' => false,
+     *         'searchPlaceholderValue' => 'Type to search',
+     *         'classNames' => [
+     *             'containerOuter' => 'choices choices-'.$this->getInstanceVarName()
+     *         ]
+     *     ],
+     *     'options' => [
+     *         'prompt' => 'Search...'
+     *     ]
+     *     ```
+     *     This will also register javascript that uses fetch() to get the results,
+     * `searchListenerJs`
+     *     The javascript that is run to make an AJAX request. @see getSearchListenerJs()
+     *     for the default implementation. Set to false to not run, and implement 
+     *     your own solution
+     * `delay`
+     *     The number of milliseconds to delay before making the ajax request. Prevents
+     *     too many requests and provides a better UI.
+     * `minChars`
+     *     The minimum number of characters in the search input before making the
+     *     ajax call
+     * `choiceMadeJs`
+     *     The javascript to run when a choice has been made. @see getChoiceMadeJs()
+     *     for the default implementation. Set to false to not run, and implement 
+     *     your own solution
+     * `dropdownOpenJs`
+     *     The javascript to run when the dropdown is opened. @see getShowDropdownFocusJs()
+     *     for the default implementation. Set to false to not run, and implement 
+     *     your own solution
+     * 
+     * @var array
      */
-    public $ajaxUrl;
+    public $ajaxOptions = [];
 
     /**
-     * @see getSearchListenerJs()
-     * @var string Javascript that will be registered if $ajaxUrl has a value.
-     * Intended to be used to fetch choices from the $ajaxUrl by listening to
-     * the 'search' event
+     * Default options for $ajaxOptions
+     * @see $ajaxOptions
+     * @var array
      */
-    public $searchListenerJs;
+    static $defaultAjaxOptions = [
+        'delay' => 500,
+        'minChars' => 3
+    ];
 
     /**
-     * @see getClearChoicesJs()
-     * @var string Javascript that will be registered if $ajaxUrl has a value.
-     * Intended to clear choices after a selection has been made
-     */
-    public $clearChoicesJs;
-
-    /**
-     * @see getShowDropdownFocusJs()
-     * @var string Javascript that will be registered if $ajaxUrl has a value.
-     * Intended to focus on the search input when the dropdown opens
-     */
-    public $showDropdownFocusJs;
-
-    /**
-     * Set default options if $ajaxUrl has been provided and no values for
+     * Set default options if $ajaxOptions['url'] has been provided and no values for
      * the needed options
      * {@inheritdoc}
      */
     public function init()
     {
         parent::init();
-        if(!empty($this->ajaxUrl)){
-            if(!isset($this->jsOptions['noChoicesText'])){
-                $this->jsOptions['noChoicesText'] = 'No items matching search';
-            }
-            if(!isset($this->options['prompt'])){
-                $this->options['prompt'] = 'Search...';
-            }
-            if(!isset($this->jsOptions['searchPlaceholderValue'])){
-                $this->jsOptions['searchPlaceholderValue'] = 'Type to search';
-            }
-            if(!isset($this->jsOptions['searchChoices'])){
-                $this->jsOptions['searchChoices'] = false;
-            }
-            if(!isset($this->jsOptions['classNames']['containerOuter'])){
-                $this->jsOptions['classNames']['containerOuter'] = 'choices choices-'.$this->getInstanceVarName();
-            }
-            // --- Hide the loading states
-            $this->getView()->registerCss('.choices-'.$this->getInstanceVarName().' .choices__inner .choices__item~.choices__placeholder{display:none}');
+        if(!empty($this->ajaxOptions['url'])){
+            $this->initializeForAjax();
         }
     }
 
@@ -109,17 +101,16 @@ class ChoicesJs extends \yii\widgets\InputWidget
      */
     public function run()
     {
-    	$this->registerJavascript();
+    	$this->registerDefaultJavascript();
     	return Html::activeDropDownList($this->model, $this->attribute, $this->data, $this->options);
     }
 
     /**
      * Registers the assets and javascript needed to change the select element
-     * into a Choices.js javascript widget. If an $ajaxUrl was supplied, it will
-     * also register the default javascript
+     * into a Choices.js javascript widget.
      * @return void
      */
-    protected function registerJavascript()
+    protected function registerDefaultJavascript()
     {
     	ChoicesJsAsset::register($this->getView());
     	$elementId = $this->options['id'];
@@ -128,12 +119,6 @@ const {$this->getInstanceVarName()} = new Choices('#{$elementId}', {$this->getOp
 JAVASCRIPT;
 		$this->getView()->registerJs($js, \yii\web\View::POS_END);
 		$this->getView()->registerJsVar($this->getOptionsVarName(), $this->jsOptions);
-
-        if(!empty($this->ajaxUrl)){
-            $this->getView()->registerJs($this->getSearchListenerJs(), \yii\web\View::POS_END);
-            $this->getView()->registerJs($this->getClearChoicesJs(), \yii\web\View::POS_END);
-            $this->getView()->registerJs($this->getShowDropdownFocusJs(), \yii\web\View::POS_END);
-        }
     }
 
     /**
@@ -164,23 +149,57 @@ JAVASCRIPT;
     }
 
     /**
-     * Gets the javascript that will be used to fetch choices from the $ajaxUrl.
+     * Set some default values that create a desired UI when populating choices
+     * from a remote AJAX source
+     * @return void
+     */
+    public function initializeForAjax()
+    {
+        $this->ajaxOptions = ArrayHelper::merge(self::$defaultAjaxOptions, $this->ajaxOptions);
+        if(!isset($this->jsOptions['noChoicesText'])){
+            $this->jsOptions['noChoicesText'] = 'No items matching search';
+        }
+        if(!isset($this->options['prompt'])){
+            $this->options['prompt'] = 'Search...';
+        }
+        if(!isset($this->jsOptions['searchPlaceholderValue'])){
+            $this->jsOptions['searchPlaceholderValue'] = 'Type to search';
+        }
+        if(!isset($this->jsOptions['searchChoices'])){
+            // --- Turn off regular searching since we are doing it via ajax
+            $this->jsOptions['searchChoices'] = false;
+        }
+        if(!isset($this->jsOptions['classNames']['containerOuter'])){
+            // --- Setting a custom container so we can apply custom css
+            $this->jsOptions['classNames']['containerOuter'] = 'choices choices-'.$this->getInstanceVarName();
+        }
+        // --- Hide the loading states in the area for selecteed choices
+        $this->getView()->registerCss('.choices-'.$this->getInstanceVarName().' .choices__inner .choices__item~.choices__placeholder{display:none}');
+
+        $this->getView()->registerJs($this->getSearchListenerJs(), \yii\web\View::POS_END);
+        $this->getView()->registerJs($this->getChoiceMadeJs(), \yii\web\View::POS_END);
+        $this->getView()->registerJs($this->getDropdownOpenJs(), \yii\web\View::POS_END);
+    }
+
+    /**
+     * Gets the javascript used to fetch choices from the $ajaxOptions['url']
      * Expects the endpoint to return data in an array format with properties
      * `label` and `id` defined to be used as the label and value.
+     * UI ajax search improvements like
      * @return string
      */
     public function getSearchListenerJs()
     {
-        if($this->searchListenerJs === null){
-            $this->searchListenerJs = <<<JAVASCRIPT
+        if(!isset($this->ajaxOptions['searchListenerJs']) || empty($this->ajaxOptions['searchListenerJs'])){
+            $this->ajaxOptions['searchListenerJs'] = <<<JAVASCRIPT
 let delayCallId = false;
 document.getElementById("{$this->options['id']}").addEventListener("search", function(e){
-    if(e.detail.value.length >= 3){
+    if(e.detail.value.length >= {$this->ajaxOptions['minChars']}){
         clearTimeout(delayCallId);
         let self = this;
         delayCallId = setTimeout(function(){
             {$this->getInstanceVarName()}.setChoices(() => {
-                return fetch("{$this->ajaxUrl}?term="+e.detail.value, {
+                return fetch("{$this->ajaxOptions['url']}?term="+e.detail.value, {
                     method: "GET"
                 }).then(function(response){ return response.json() })
                 .then(function(json){
@@ -204,12 +223,12 @@ document.getElementById("{$this->options['id']}").addEventListener("search", fun
                     {$this->getInstanceVarName()}.itemList.getChild(".choices__placeholder").remove();
                 }
             });
-        }, 500);
+        }, {$this->ajaxOptions['delay']});
     }
 })
 JAVASCRIPT;
         }
-        return $this->searchListenerJs;
+        return $this->ajaxOptions['searchListenerJs'];
     }
 
     /**
@@ -220,17 +239,20 @@ JAVASCRIPT;
      * prompt back in and set it as the selected choice.
      * @return string
      */
-    public function getClearChoicesJs()
+    public function getChoiceMadeJs()
     {
-        if($this->clearChoicesJs === null){
+        if(!isset($this->ajaxOptions['choiceMadeJs']) || empty($this->ajaxOptions['choiceMadeJs'])){
             // --- Set the placeholder when we clear choices back to the prompt or empty
             $promptLabel = !empty($this->options['prompt']) ? $this->options['prompt'] : '';
-            $this->clearChoicesJs = <<<JAVASCRIPT
+            $this->ajaxOptions['choiceMadeJs'] = <<<JAVASCRIPT
 document.getElementById("{$this->options['id']}").addEventListener("choice", function(e){
     // --- Triggered when a user selects a choice
     {$this->getInstanceVarName()}.clearChoices(); // --- Clear choices (from search result)
 
-    // --- Set up for the removal of the 'no choices' element for the UI to be for a fresh search
+    // --- Remove the 'no choices' element after a selection b/c it's bad UI to
+    // --- show after a successful search and choice. This is one of the most 
+    // --- hacky parts of all of this and depends on the user no re-opening the 
+    // --- search and seeing that element but for now it accomplishes the desire
     let self = this;
     setTimeout(function(){ 
         let noChoicesElement = self.parentNode.parentNode.querySelector('.has-no-choices')
@@ -255,7 +277,7 @@ document.getElementById('{$this->options['id']}').addEventListener("change", fun
 })
 JAVASCRIPT;
         }
-        return $this->clearChoicesJs;
+        return $this->ajaxOptions['choiceMadeJs'];
     }
 
 
@@ -264,16 +286,16 @@ JAVASCRIPT;
      * the dropdown has been shown
      * @return string
      */
-    public function getShowDropdownFocusJs()
+    public function getDropdownOpenJs()
     {
-        if($this->showDropdownFocusJs === null){
-            $this->showDropdownFocusJs = <<<JAVASCRIPT
+        if(!isset($this->ajaxOptions['dropdownOpenJs']) || empty($this->ajaxOptions['dropdownOpenJs'])){
+            $this->ajaxOptions['dropdownOpenJs'] = <<<JAVASCRIPT
 document.getElementById("{$this->options['id']}").addEventListener("showDropdown", function(e){
     this.parentNode.parentNode.querySelector(".choices__input.choices__input--cloned").focus();
 })
 JAVASCRIPT;
         }
-        return $this->showDropdownFocusJs;
+        return $this->ajaxOptions['dropdownOpenJs'];
     }
 }
 ?>
