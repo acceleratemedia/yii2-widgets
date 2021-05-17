@@ -101,7 +101,26 @@ class ChoicesJs extends \yii\widgets\InputWidget
      */
     public function run()
     {
+        // --- If we are not applying any 'itemSelectText' then write some CSS to
+        // --- make the dropdown item take the full width
+        if(!isset($this->jsOptions['noResultsText'])){
+            $this->jsOptions['noResultsText'] = 'No results...';
+        }
+        if(!isset($this->jsOptions['itemSelectText'])){
+            $this->jsOptions['itemSelectText'] = '';
+            if(!isset($this->jsOptions['classNames']['list'])){
+                $this->jsOptions['classNames']['list'] = $this->options['id'];
+            }
+            $css = <<<CSS
+.{$this->jsOptions['classNames']['list']} .choices__item--selectable{padding-right:0;}
+CSS;
+            $this->getView()->registerCss($css);
+        }
+
+        // --- Register default javascript
     	$this->registerDefaultJavascript();
+
+        // --- render the dropdown
     	return Html::activeDropDownList($this->model, $this->attribute, $this->data, $this->options);
     }
 
@@ -118,7 +137,7 @@ class ChoicesJs extends \yii\widgets\InputWidget
 const {$this->getInstanceVarName()} = new Choices('#{$elementId}', {$this->getOptionsVarName()})
 JAVASCRIPT;
 		$this->getView()->registerJs($js, \yii\web\View::POS_END);
-		$this->getView()->registerJsVar($this->getOptionsVarName(), $this->jsOptions);
+		$this->getView()->registerJsVar($this->getOptionsVarName(), (object)$this->jsOptions);
     }
 
     /**
