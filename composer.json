@@ -4,6 +4,7 @@
     "type": "yii2-extension",
     "require": {
         "npm-asset/choices.js": "*",
+        "npm-asset/flatpickr": "*",
         "yiisoft/yii2": "^2.0",
         "yiidoc/yii2-redactor": "*"
     },
@@ -17,6 +18,7 @@
     "autoload": {
         "psr-4": {
             "bvb\\choices\\": "src/choices",
+            "bvb\\flatpickr\\": "src/flatpickr",
             "bvb\\yiiwidget\\": "src"
         }
     },
