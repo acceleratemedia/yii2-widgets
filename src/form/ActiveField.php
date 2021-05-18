@@ -1,6 +1,7 @@
 <?php
 namespace bvb\yiiwidget\form;
 
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 
 class ActiveField extends \yii\widgets\ActiveField
@@ -25,7 +26,7 @@ class ActiveField extends \yii\widgets\ActiveField
      * @var string Default template to use when hints are displayed as tooltips
      * and we are rendering a checkbox input
      */
-    const TEMPLATE_TOOLTIP_HINT_CHECKBOX = "{label}\n{input}\n{hint}\n{error}";
+    const TEMPLATE_TOOLTIP_HINT_CHECKBOX = "<div class=\"form-check form-switch\">{input}\n{label}\n{hint}</div>\n{error}";
 
     /**
      * Set the template to auto determine by default
@@ -114,7 +115,7 @@ JAVASCRIPT;
      * tooltips then use the option
      * {@inheritdoc}
      */
-    public function checkbox($options = [], $enclosedByLabel = true)
+    public function checkbox($options = [], $enclosedByLabel = false)
     {
         if(
             isset($this->hintOptions['asTooltip']) &&
@@ -124,6 +125,14 @@ JAVASCRIPT;
             $this->template = self::TEMPLATE_TOOLTIP_HINT_CHECKBOX;
         }
 
+        $defaultOptions = [
+            'class' => 'form-check-input',
+            'labelOptions' => [
+                'class' => 'form-check-label',
+            ],
+        ];
+
+        $options = ArrayHelper::merge($defaultOptions, $options);
         return parent::checkbox($options, $enclosedByLabel);
     }
 
