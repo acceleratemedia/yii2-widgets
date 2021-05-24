@@ -55,9 +55,10 @@ class FilePond extends \yii\widgets\InputWidget
         // --- Load the main library
     	FilePondAsset::register($this->getView());
         $js = <<<JAVASCRIPT
+let {$this->getInstanceVarName()};
 document.addEventListener('FilePond:loaded', e => {
     {$pluginJs}
-    FilePond.create(document.getElementById('{$this->options['id']}'), {$this->getOptionsVarName()});
+    {$this->getInstanceVarName()} = FilePond.create(document.getElementById('{$this->options['id']}'), {$this->getOptionsVarName()});
 });
 JAVASCRIPT;
 
@@ -78,5 +79,19 @@ JAVASCRIPT;
             $this->_optionsVarName = 'filepond_'.Inflector::variablize($this->options['id']).'Options';
         }
         return $this->_optionsVarName;
+    }
+
+
+    /**
+     * @return string The name of the variable that the Choices javascript object
+     * instance will he held in
+     */
+    private $_instanceVarName;
+    public function getInstanceVarName()
+    {
+        if(empty($this->_instanceVarName)){
+            $this->_instanceVarName = Inflector::variablize($this->options['id']);
+        }
+        return $this->_instanceVarName;
     }
 }
