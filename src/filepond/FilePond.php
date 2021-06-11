@@ -24,6 +24,13 @@ class FilePond extends \yii\widgets\InputWidget
     public $plugins = [];
 
     /**
+     * The event to listen to where intiliazation of the javascript widget will
+     * take place. Set to false to not run and write a custom initialization
+     * @var string
+     */
+    public $initializeEvent = 'FilePond:loaded';
+
+    /**
      * Register the javascript and run the widget
      * {@inheritdoc}
      */
@@ -43,6 +50,28 @@ class FilePond extends \yii\widgets\InputWidget
      */
     protected function registerDefaultJavascript()
     {
+        // --- Load the main library
+    	FilePondAsset::register($this->getView());
+        if(is_string($this->initializeEvent)){        
+            $js = <<<JAVASCRIPT
+let {$this->getInstanceVarName()};
+document.addEventListener('{$this->initializeEvent}', e => {
+    {$this->getPluginJs()}
+    {$this->getInstanceVarName()} = FilePond.create(document.getElementById('{$this->options['id']}'), {$this->getOptionsVarName()});
+});
+JAVASCRIPT;
+
+            $this->getView()->registerJs($js, \yii\web\View::POS_END);
+        }
+        $this->getView()->registerJsVar($this->getOptionsVarName(), (object)$this->jsOptions);
+    }
+
+    /**
+     * Gets the javascript to register the specified plugins
+     * @return string
+     */
+    public function getPluginJs()
+    {
         // --- FilePond requires plugins load before the main library
         $pluginIds = [];
         foreach($this->plugins as $pluginClass){
@@ -50,23 +79,8 @@ class FilePond extends \yii\widgets\InputWidget
             $pluginIds[] = $pluginClass::PLUGIN_ID;
         }
 
-        $pluginJs = (empty($pluginIds)) ? '' : 'FilePond.registerPlugin('.implode(',', $pluginIds).')';
-
-        // --- Load the main library
-    	FilePondAsset::register($this->getView());
-        $js = <<<JAVASCRIPT
-let {$this->getInstanceVarName()};
-document.addEventListener('FilePond:loaded', e => {
-    {$pluginJs}
-    {$this->getInstanceVarName()} = FilePond.create(document.getElementById('{$this->options['id']}'), {$this->getOptionsVarName()});
-});
-JAVASCRIPT;
-
-
-        $this->getView()->registerJs($js, \yii\web\View::POS_END);
-        $this->getView()->registerJsVar($this->getOptionsVarName(), (object)$this->jsOptions);
+        return (empty($pluginIds)) ? '' : 'FilePond.registerPlugin('.implode(',', $pluginIds).')';
     }
-
 
     /**
      * @return string The name of the variable that holds the options that will
