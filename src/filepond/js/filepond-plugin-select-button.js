@@ -59,7 +59,6 @@
 
       // create the image select plugin, but only do so if the item is an image
       var didLoadItem = function didLoadItem(_ref6) {
-        console.log("_ref6",_ref6)
         var root = _ref6.root,
           props = _ref6.props;
 
