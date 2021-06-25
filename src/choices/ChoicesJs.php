@@ -121,7 +121,10 @@ CSS;
     	$this->registerDefaultJavascript();
 
         // --- render the dropdown
-    	return Html::activeDropDownList($this->model, $this->attribute, $this->data, $this->options);
+        if($this->hasModel()){
+    	   return Html::activeDropDownList($this->model, $this->attribute, $this->data, $this->options);
+        }
+        return Html::dropdownList($this->name, $this->value, $this->data, $this->options);
     }
 
     /**
