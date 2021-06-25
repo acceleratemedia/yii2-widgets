@@ -3,6 +3,7 @@
     "description": "Widgets commonly reused in Yii2 applications",
     "type": "yii2-extension",
     "require": {
+        "npm-asset/codemirror": "*",
         "npm-asset/choices.js": "*",
         "npm-asset/filepond": "*",
         "npm-asset/filepond-plugin-file-metadata": "*",
@@ -21,7 +22,9 @@
     "minimum-stability": "dev",
     "autoload": {
         "psr-4": {
+            "bvb\\bs5\\": "src/bs5",
             "bvb\\choices\\": "src/choices",
+            "bvb\\codemirror\\": "src/codemirror",
             "bvb\\filepond\\": "src/filepond",
             "bvb\\flatpickr\\": "src/flatpickr",
             "bvb\\yiiwidget\\": "src"
