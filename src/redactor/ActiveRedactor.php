@@ -3,16 +3,14 @@ namespace bvb\yiiwidget\redactor;
 
 use Yii;
 use yii\helpers\Html;
-use yii\base\Widget;
 use yii\helpers\ArrayHelper;
-use yii\redactor\widgets\Redactor;
 
 /**
  * Exteneds [[yii\redactor\widgets\Redactor]] to render it inside of a container
  * so that it may grow and increase in size but not beyond a limit and stay in
  * that container while scrolling
  */
-class ActiveRedactor extends Redactor
+class ActiveRedactor extends \yii\redactor\widgets\Redactor
 {
     /**
      * Render a container around the parent implementation
@@ -26,9 +24,11 @@ class ActiveRedactor extends Redactor
             'toolbarFixedTarget' => '#'.$containerId.'-redactor-container',
         ];
         $this->options = ArrayHelper::merge($defaultOptions, $this->options);
-        echo '<div id="'.$containerId.'-redactor-container" class="redactor-container">';
+        ob_start();
         parent::run();
-        echo '</div>';
+        $content = ob_get_contents();
+        ob_end_clean();
+        return '<div id="'.$containerId.'-redactor-container" class="redactor-container">' . $content . '</div>';
     }
 
     /**
@@ -58,4 +58,3 @@ CSS;
         Yii::$app->getView()->registerCss( preg_replace('/\s+/', '', $css), [], 'active-redactor-css' );
     }
 }
-?>
