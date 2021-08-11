@@ -14,7 +14,8 @@ class Helper
     static $containerDefinitions = [
         \yii\widgets\ActiveForm::class => [
             'validationStateOn' => \yii\widgets\ActiveForm::VALIDATION_STATE_ON_INPUT,
-            'errorCssClass' => 'is-invalid'
+            'errorCssClass' => 'is-invalid',
+            'errorSummaryCssClass' => 'alert alert-danger'
         ],
         \yii\widgets\ActiveField::class => \bvb\yiiwidget\form\ActiveField::class,
     ];
