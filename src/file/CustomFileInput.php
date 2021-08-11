@@ -5,7 +5,6 @@ namespace bvb\yiiwidget\file;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
-use yii\widgets\InputWidget;
 
 /**
  * ActiveField displays the appropriate form input based on the `widget_config`
@@ -13,7 +12,7 @@ use yii\widgets\InputWidget;
  * this class is used to render [[bvb\filldoc\common\models\FdInputUser]] models
  * and it gets the widget config from the related FdInput model
  */
-class CustomFileInput extends InputWidget
+class CustomFileInput extends \yii\widgets\InputWidget
 {
     /**
      * Template to be used on an ActiveField instance
@@ -36,11 +35,6 @@ class CustomFileInput extends InputWidget
             $this->registerCustomFileInputJavascript();
             $this->registerCustomFileInputStyles();
             $this->field->labelOptions['data-content'] = 'Browse';
-
-            if(isset($this->field->hintType)){
-                // --- THis removes some bug styling on this input type for kartik activeform/fields
-                Html::removeCssClass($this->field->options, 'kv-hint-special');
-            }
         }
         $this->field->labelOptions['class'] = 'custom-file-label';
         $this->field->options['class']['customFileInput'] = 'custom-file restore-normal-hint';
@@ -65,12 +59,12 @@ class CustomFileInput extends InputWidget
     protected function registerCustomFileInputJavascript()
     {
         $inputId = Html::getInputId($this->model, $this->attribute);
-        $ready_js = <<<JAVASCRIPT
-$("body").on("change", "#{$inputId}", function(e){
+        $readyJs = <<<JAVASCRIPT
+document.getElementById("#{$inputId}", function(e){
     $(".custom-file-label").attr("data-content", e.currentTarget.files[0].name);
 });
 JAVASCRIPT;
-        Yii::$app->view->registerJs($ready_js);
+        Yii::$app->view->registerJs($readyJs);
     }
 
     /**
@@ -106,7 +100,7 @@ CSS;
     {
         if(empty($this->fieldTemplate)){
             if($this->bs5){
-                $this->fieldTemplate = "{label}\n{input}\n{error}\n{hint}";
+                $this->fieldTemplate = "{label}\n{hint}\n{input}\n{error}";
             } else {
                 $this->fieldTemplate = "{input}\n{label}\n{error}\n{hint}";
             }
