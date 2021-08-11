@@ -106,16 +106,24 @@ class ChoicesJs extends \yii\widgets\InputWidget
         if(!isset($this->jsOptions['noResultsText'])){
             $this->jsOptions['noResultsText'] = 'No results...';
         }
+            $css = <<<CSS
+.choices__heading {
+    border-bottom: 1px solid #CCC;
+    color: #333;
+    font-style: italic;
+}
+CSS;
         if(!isset($this->jsOptions['itemSelectText'])){
             $this->jsOptions['itemSelectText'] = '';
             if(!isset($this->jsOptions['classNames']['list'])){
                 $this->jsOptions['classNames']['list'] = $this->options['id'];
             }
-            $css = <<<CSS
+            $css .= <<<CSS
 .{$this->jsOptions['classNames']['list']} .choices__item--selectable{padding-right:0;}
 CSS;
-            $this->getView()->registerCss($css);
         }
+
+        $this->getView()->registerCss($css);
 
         // --- Register default javascript
     	$this->registerDefaultJavascript();
