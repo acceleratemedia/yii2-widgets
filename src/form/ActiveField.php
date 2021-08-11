@@ -101,7 +101,7 @@ var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
   return new bootstrap.Tooltip(tooltipTriggerEl)
 })
 JAVASCRIPT;
-            $this->form->getView()->registerJs($js, \yii\web\View::POS_END, 'activefield-tooltip-trigger-js');
+            $this->form->getView()->registerJs($js, \yii\web\View::POS_END, 'activefield-tooltip-trigger-js-'.$this->form->options['id']);
         } else {
             $this->parts['{hint}'] = '';
         }
