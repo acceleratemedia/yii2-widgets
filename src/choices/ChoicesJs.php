@@ -234,7 +234,7 @@ document.getElementById("{$this->options['id']}").addEventListener("search", fun
                 }).then(function(response){ return response.json() })
                 .then(function(json){
                     return json.map(function(result) {
-                      return { label: result.label, value: result.id };
+                      return { label: result.label, value: result.id, customProperties: (result.customProperties) ? result.customProperties : null };
                     });
                 }).catch((err) => {
                     alert(err);
