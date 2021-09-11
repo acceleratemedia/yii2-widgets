@@ -50,9 +50,7 @@ class ActiveField extends \yii\widgets\ActiveField
      * Set up for Bootstrap 5
      * {@inheritdoc}
      */
-    public $errorOptions = [
-        'class' => 'invalid-feedback'
-    ];
+    public $errorOptions = ['class' => 'invalid-feedback'];
 
     /**
      * By default, set a key 'asTooltip' to true, which will render the hint
@@ -143,7 +141,14 @@ JAVASCRIPT;
      */
     public function dropDownList($items, $options = [])
     {
-        $this->inputOptions['class'] = 'form-select';
+        if(is_string($this->inputOptions['class'])){
+            $this->inputOptions['class'] = 'form-select';
+        } elseif(
+            is_array($this->inputOptions['class']) && 
+            !isset($this->inputOptions['class']['bs5'])
+        ){
+            $this->inputOptions['class']['bs5'] = 'form-select';
+        }
         parent::dropdownList($items, $options);
 
         return $this;
