@@ -59,12 +59,12 @@ class Dropdown extends \yii\widgets\Menu
      */
     public function run()
     {
-        $containerOptions = ArrayHelper::merge(self::$defaultContainerOptions, $this->containerOptions);
+        $containerOptions = ArrayHelper::merge(static::$defaultContainerOptions, $this->containerOptions);
         $containerTag = ArrayHelper::remove($containerOptions, 'tag');
 
         $menuLinkId = (isset($this->options['id']) ? $this->options['id'] : $this->getId()).'-menu-link';
         $menuLinkOptions = ArrayHelper::merge(
-            self::$defaultMenuLinkOptions,
+            static::$defaultMenuLinkOptions,
             [
                 'id' => $menuLinkId
             ],
