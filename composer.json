@@ -10,6 +10,7 @@
         "npm-asset/filepond-plugin-image-preview": "*",
         "npm-asset/filepond-plugin-image-exif-orientation": "*",
         "npm-asset/flatpickr": "*",
+        "npm-asset/sortablejs": "*",
         "yiisoft/yii2": "^2.0",
         "yiidoc/yii2-redactor": "*"
     },
@@ -27,6 +28,7 @@
             "bvb\\codemirror\\": "src/codemirror",
             "bvb\\filepond\\": "src/filepond",
             "bvb\\flatpickr\\": "src/flatpickr",
+            "bvb\\sortablejs\\": "src/sortablejs",
             "bvb\\yiiwidget\\": "src"
         }
     },
