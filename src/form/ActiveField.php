@@ -123,6 +123,21 @@ JAVASCRIPT;
             $this->template = self::TEMPLATE_TOOLTIP_HINT_CHECKBOX;
         }
 
+        // --- This is to get a validation aria-attribute to apply to form-check 
+        // --- which helps with UI
+        if($this->template == self::TEMPLATE_TOOLTIP_HINT_CHECKBOX){
+            $switchContainerOptions = ['class' => ['form-check form-switch']];
+            $this->addErrorClassIfNeeded($switchContainerOptions);
+
+            if(empty($this->selectors['input'])){
+                $switchContainerOptions['id'] = $this->getInputId().'-form-switch';
+                $this->selectors['input'] = '#'.$switchContainerOptions['id'];
+            }
+
+            $inSwitchContent = "{input}\n{label}\n{hint}";
+            $this->template = Html::tag('div', $inSwitchContent, $switchContainerOptions)."\n{error}";
+        }
+
         $defaultOptions = [
             'class' => 'form-check-input',
             'labelOptions' => [
