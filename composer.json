@@ -1,5 +1,5 @@
 {
-    "name": "brianvb/yii2-widgets",
+    "name": "acceleratemedia/yii2-widgets",
     "description": "Widgets commonly reused in Yii2 applications",
     "type": "yii2-extension",
     "require": {
