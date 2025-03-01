@@ -222,8 +222,8 @@ class ChoicesJs extends \yii\widgets\InputWidget
     {
         if(!isset($this->ajaxOptions['searchListenerJs']) || empty($this->ajaxOptions['searchListenerJs'])){
             $this->ajaxOptions['searchListenerJs'] = <<<JAVASCRIPT
-                let delayCallId = false;
                 document.getElementById("{$this->options['id']}").addEventListener("search", function(e){
+                    let delayCallId = false;
                     if(e.detail.value.length >= {$this->ajaxOptions['minChars']}){
                         clearTimeout(delayCallId);
                         let self = this;
