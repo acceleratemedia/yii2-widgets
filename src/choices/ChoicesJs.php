@@ -13,7 +13,7 @@ use yii\helpers\Json;
 class ChoicesJs extends \yii\widgets\InputWidget
 {
     /**
-     * @var array $data The options for the select input. The array keys are 
+     * @var array $data The options for the select input. The array keys are
      * option values, and the array values are the corresponding option labels
      */
     public $data = [];
@@ -29,9 +29,9 @@ class ChoicesJs extends \yii\widgets\InputWidget
      * setting choices from a remote data source using AJAX. To set this up
      * to use ajax, only the 'url' key is required. Configuration is as such:
      * `ajax`:
-     *     A url that will be requested to set the choices. This automatically 
+     *     A url that will be requested to set the choices. This automatically
      *     configures a number of options and registers javascript to provide for
-     *     an optimal AJAX experience. 
+     *     an optimal AJAX experience.
      *     If this value is provided, the following values will be set IF they have
      *     not already been:
      *     ```php
@@ -51,7 +51,7 @@ class ChoicesJs extends \yii\widgets\InputWidget
      *     This will also register javascript that uses fetch() to get the results,
      * `searchListenerJs`
      *     The javascript that is run to make an AJAX request. @see getSearchListenerJs()
-     *     for the default implementation. Set to false to not run, and implement 
+     *     for the default implementation. Set to false to not run, and implement
      *     your own solution
      * `delay`
      *     The number of milliseconds to delay before making the ajax request. Prevents
@@ -61,13 +61,13 @@ class ChoicesJs extends \yii\widgets\InputWidget
      *     ajax call
      * `choiceMadeJs`
      *     The javascript to run when a choice has been made. @see getChoiceMadeJs()
-     *     for the default implementation. Set to false to not run, and implement 
+     *     for the default implementation. Set to false to not run, and implement
      *     your own solution
      * `dropdownOpenJs`
      *     The javascript to run when the dropdown is opened. @see getShowDropdownFocusJs()
-     *     for the default implementation. Set to false to not run, and implement 
+     *     for the default implementation. Set to false to not run, and implement
      *     your own solution
-     * 
+     *
      * @var array
      */
     public $ajaxOptions = [];
@@ -107,20 +107,20 @@ class ChoicesJs extends \yii\widgets\InputWidget
             $this->jsOptions['noResultsText'] = 'No results...';
         }
             $css = <<<CSS
-.choices__heading {
-    border-bottom: 1px solid #CCC;
-    color: #333;
-    font-style: italic;
-}
-CSS;
+                .choices__heading {
+                    border-bottom: 1px solid #CCC;
+                    color: #333;
+                    font-style: italic;
+                }
+            CSS;
         if(!isset($this->jsOptions['itemSelectText'])){
             $this->jsOptions['itemSelectText'] = '';
             if(!isset($this->jsOptions['classNames']['list'])){
                 $this->jsOptions['classNames']['list'] = $this->options['id'];
             }
             $css .= <<<CSS
-.{$this->jsOptions['classNames']['list']} .choices__item--selectable{padding-right:0;}
-CSS;
+                .{$this->jsOptions['classNames']['list']} .choices__item--selectable{padding-right:0;}
+            CSS;
         }
 
         $this->getView()->registerCss($css);
@@ -145,8 +145,8 @@ CSS;
     	ChoicesJsAsset::register($this->getView());
     	$elementId = $this->options['id'];
     	$js = <<<JAVASCRIPT
-const {$this->getInstanceVarName()} = new Choices('#{$elementId}', {$this->getOptionsVarName()})
-JAVASCRIPT;
+            const {$this->getInstanceVarName()} = new Choices('#{$elementId}', {$this->getOptionsVarName()})
+        JAVASCRIPT;
 		$this->getView()->registerJs($js, \yii\web\View::POS_END);
 		$this->getView()->registerJsVar($this->getOptionsVarName(), (object)$this->jsOptions);
     }
@@ -222,41 +222,41 @@ JAVASCRIPT;
     {
         if(!isset($this->ajaxOptions['searchListenerJs']) || empty($this->ajaxOptions['searchListenerJs'])){
             $this->ajaxOptions['searchListenerJs'] = <<<JAVASCRIPT
-let delayCallId = false;
-document.getElementById("{$this->options['id']}").addEventListener("search", function(e){
-    if(e.detail.value.length >= {$this->ajaxOptions['minChars']}){
-        clearTimeout(delayCallId);
-        let self = this;
-        delayCallId = setTimeout(function(){
-            {$this->getInstanceVarName()}.setChoices(() => {
-                return fetch("{$this->ajaxOptions['url']}?term="+e.detail.value, {
-                    method: "GET"
-                }).then(function(response){ return response.json() })
-                .then(function(json){
-                    return json.map(function(result) {
-                      return { label: result.label, value: result.id, customProperties: (result.customProperties) ? result.customProperties : null };
-                    });
-                }).catch((err) => {
-                    alert(err);
-                }).finally(function(){
-                    clearTimeout(delayCallId);
-                });
-            }, 'value', 'label', true)
-            .then((test) => {
-                // --- Re-focus on the input after setting choices since it loses focus
-                self.parentNode.parentNode.querySelector(".choices__input.choices__input--cloned").focus();
+                let delayCallId = false;
+                document.getElementById("{$this->options['id']}").addEventListener("search", function(e){
+                    if(e.detail.value.length >= {$this->ajaxOptions['minChars']}){
+                        clearTimeout(delayCallId);
+                        let self = this;
+                        delayCallId = setTimeout(function(){
+                            {$this->getInstanceVarName()}.setChoices(() => {
+                                return fetch("{$this->ajaxOptions['url']}?term="+e.detail.value, {
+                                    method: "GET"
+                                }).then(function(response){ return response.json() })
+                                .then(function(json){
+                                    return json.map(function(result) {
+                                    return { label: result.label, value: result.id, customProperties: (result.customProperties) ? result.customProperties : null };
+                                    });
+                                }).catch((err) => {
+                                    alert(err);
+                                }).finally(function(){
+                                    clearTimeout(delayCallId);
+                                });
+                            }, 'value', 'label', true)
+                            .then((test) => {
+                                // --- Re-focus on the input after setting choices since it loses focus
+                                self.parentNode.parentNode.querySelector(".choices__input.choices__input--cloned").focus();
 
-                // --- If there is a selected item and a placeholder, remove the placeholder and keep
-                // --- only the selected item
-                let selectedItem = {$this->getInstanceVarName()}.itemList.getChild("div:not(.choices__placeholder)");
-                if(selectedItem && {$this->getInstanceVarName()}.itemList.getChild(".choices__placeholder")){
-                    {$this->getInstanceVarName()}.itemList.getChild(".choices__placeholder").remove();
-                }
-            });
-        }, {$this->ajaxOptions['delay']});
-    }
-})
-JAVASCRIPT;
+                                // --- If there is a selected item and a placeholder, remove the placeholder and keep
+                                // --- only the selected item
+                                let selectedItem = {$this->getInstanceVarName()}.itemList.getChild("div:not(.choices__placeholder)");
+                                if(selectedItem && {$this->getInstanceVarName()}.itemList.getChild(".choices__placeholder")){
+                                    {$this->getInstanceVarName()}.itemList.getChild(".choices__placeholder").remove();
+                                }
+                            });
+                        }, {$this->ajaxOptions['delay']});
+                    }
+                })
+            JAVASCRIPT;
         }
         return $this->ajaxOptions['searchListenerJs'];
     }
@@ -264,7 +264,7 @@ JAVASCRIPT;
     /**
 
      * Gets the javascript that will be used to clear the choices after a choice
-     * is made. By default, it will set the choices back to the default prompt. 
+     * is made. By default, it will set the choices back to the default prompt.
      * If a change is detected and there are no options, it will add the default
      * prompt back in and set it as the selected choice.
      * @return string
@@ -275,37 +275,37 @@ JAVASCRIPT;
             // --- Set the placeholder when we clear choices back to the prompt or empty
             $promptLabel = !empty($this->options['prompt']) ? $this->options['prompt'] : '';
             $this->ajaxOptions['choiceMadeJs'] = <<<JAVASCRIPT
-document.getElementById("{$this->options['id']}").addEventListener("choice", function(e){
-    // --- Triggered when a user selects a choice
-    {$this->getInstanceVarName()}.clearChoices(); // --- Clear choices (from search result)
+                document.getElementById("{$this->options['id']}").addEventListener("choice", function(e){
+                    // --- Triggered when a user selects a choice
+                    {$this->getInstanceVarName()}.clearChoices(); // --- Clear choices (from search result)
 
-    // --- Remove the 'no choices' element after a selection b/c it's bad UI to
-    // --- show after a successful search and choice. This is one of the most 
-    // --- hacky parts of all of this and depends on the user no re-opening the 
-    // --- search and seeing that element but for now it accomplishes the desire
-    let self = this;
-    setTimeout(function(){ 
-        let noChoicesElement = self.parentNode.parentNode.querySelector('.has-no-choices')
-        if(noChoicesElement){
-            noChoicesElement.remove() 
-        }
-    }, 1000);
-})
-document.getElementById('{$this->options['id']}').addEventListener("change", function(e){
-    // ---- This is triggered when someone clears the choice using the 'x' button
-    if(!e.target.options[0]){
-        // --- If we have no options left, re-apply the placeholder
-        let placeholderItem = {$this->getInstanceVarName()}._getTemplate( 'placeholder', '{$promptLabel}' ); 
-        {$this->getInstanceVarName()}.itemList.append(placeholderItem);
+                    // --- Remove the 'no choices' element after a selection b/c it's bad UI to
+                    // --- show after a successful search and choice. This is one of the most
+                    // --- hacky parts of all of this and depends on the user no re-opening the
+                    // --- search and seeing that element but for now it accomplishes the desire
+                    let self = this;
+                    setTimeout(function(){
+                        let noChoicesElement = self.parentNode.parentNode.querySelector('.has-no-choices')
+                        if(noChoicesElement){
+                            noChoicesElement.remove()
+                        }
+                    }, 1000);
+                })
+                document.getElementById('{$this->options['id']}').addEventListener("change", function(e){
+                    // ---- This is triggered when someone clears the choice using the 'x' button
+                    if(!e.target.options[0]){
+                        // --- If we have no options left, re-apply the placeholder
+                        let placeholderItem = {$this->getInstanceVarName()}._getTemplate( 'placeholder', '{$promptLabel}' );
+                        {$this->getInstanceVarName()}.itemList.append(placeholderItem);
 
-        // --- If there is a no choices element, remove it
-        let noChoicesElement = this.parentNode.parentNode.querySelector('.has-no-choices');
-        if(noChoicesElement){
-            noChoicesElement.remove();  
-        }
-    }
-})
-JAVASCRIPT;
+                        // --- If there is a no choices element, remove it
+                        let noChoicesElement = this.parentNode.parentNode.querySelector('.has-no-choices');
+                        if(noChoicesElement){
+                            noChoicesElement.remove();
+                        }
+                    }
+                })
+            JAVASCRIPT;
         }
         return $this->ajaxOptions['choiceMadeJs'];
     }
@@ -320,10 +320,10 @@ JAVASCRIPT;
     {
         if(!isset($this->ajaxOptions['dropdownOpenJs']) || empty($this->ajaxOptions['dropdownOpenJs'])){
             $this->ajaxOptions['dropdownOpenJs'] = <<<JAVASCRIPT
-document.getElementById("{$this->options['id']}").addEventListener("showDropdown", function(e){
-    this.parentNode.parentNode.querySelector(".choices__input.choices__input--cloned").focus();
-})
-JAVASCRIPT;
+                document.getElementById("{$this->options['id']}").addEventListener("showDropdown", function(e){
+                    this.parentNode.parentNode.querySelector(".choices__input.choices__input--cloned").focus();
+                })
+            JAVASCRIPT;
         }
         return $this->ajaxOptions['dropdownOpenJs'];
     }
