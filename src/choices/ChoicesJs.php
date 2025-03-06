@@ -248,9 +248,11 @@ class ChoicesJs extends \yii\widgets\InputWidget
 
                                 // --- If there is a selected item and a placeholder, remove the placeholder and keep
                                 // --- only the selected item
-                                let selectedItem = {$this->getInstanceVarName()}.itemList.getChild("div:not(.choices__placeholder)");
-                                if(selectedItem && {$this->getInstanceVarName()}.itemList.getChild(".choices__placeholder")){
-                                    {$this->getInstanceVarName()}.itemList.getChild(".choices__placeholder").remove();
+                                let itemList = {$this->getInstanceVarName()}.itemList;
+                                let selectedItem = $(itemList).find("div:not(.choices__placeholder)");
+
+                                if (selectedItem.length && $(itemList).find(".choices__placeholder").length) {
+                                    $(itemList).find(".choices__placeholder").remove();
                                 }
                             });
                         }, {$this->ajaxOptions['delay']});
